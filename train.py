@@ -58,7 +58,7 @@ class train_model(object):
         CNN_test_accuracy = []
 
         all_epoch = []
-        train_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[3, 6], gamma=0.1)
+        train_scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer_model, milestones=[10, 15], gamma=0.1)
         for epoch in range(self.load_epoch, self.epoch_size):
 
             lr = str(optimizer_model.param_groups[0]['lr'])
@@ -74,7 +74,7 @@ class train_model(object):
                 print(len(dataloader.dataset))
                 start1 = time.perf_counter()
                 for i, data in enumerate(dataloader):
-                    if self.datasets == 'MMI_CKplus' or 'OuluCasIA' in self.datasets:
+                    if self.datasets == 'MMI_CKplus' or 'OuluCasIA' or self.datasets == 'ISAFE' in self.datasets:
                         img0, img1, img2, img3, img4, img5, imgreal, label = data
                         if self.use_gpu:
                             #
@@ -89,7 +89,7 @@ class train_model(object):
                                                                    Variable(imgreal), Variable(label)
                         X_images = [X0, X1, X2, X3, X4, X5]
 
-                    else:
+                    elif self.datasets == 'CKplus':
                         img0, img1, img2, img3, img4, img5, img6, imgreal, label = data
                         if self.use_gpu:
                             #
@@ -101,6 +101,16 @@ class train_model(object):
                             X0, X1, X2, X3, X4, X5, X6, Xreal, Y = Variable(img0), Variable(img1), Variable(img2), Variable(img3), Variable(img4), Variable(img5),\
                                                                    Variable(img6), Variable(imgreal), Variable(label)
                         X_images = [X0, X1, X2, X3, X4, X5, X6]
+                    elif self.datasets == 'ISED':
+                        img0, img1, img2, img3, imgreal, label = data
+                        if self.use_gpu:
+                            #
+                            X0, X1, X2, X3, Xreal, Y = Variable(img0.cuda()), Variable(img1.cuda()),Variable(img2.cuda()),Variable(img3.cuda()),\
+                                                                   Variable(imgreal.cuda()), Variable(label.cuda())
+                        else:
+                            #
+                            X0, X1, X2, X3, Xreal, Y = Variable(img0), Variable(img1), Variable(img2), Variable(img3), Variable(imgreal), Variable(label)
+                        X_images = [X0, X1, X2, X3]
                     Y_blocks = select_Y(Y, self.category, (X0.shape)[0])
                     outputs, outputx, outputr = model(X_images, Xreal)
                     Xs = select_X(outputx, label)
@@ -119,6 +129,7 @@ class train_model(object):
                     if epoch == self.epoch_size-1 and phase == 'test':
                         self.Graph, self.box = Prepare_heatmap(self.Graph, self.box, index.view(-1, 1), Y)
                     optimizer_model.zero_grad()
+
                     if phase == 'train':
                         loss.backward()
                         optimizer_model.step()

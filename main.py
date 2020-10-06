@@ -15,13 +15,17 @@ def main(config):
     cudnn.benchmark = True
     for dataset in datasets:
         for model in models:
-            if 'OuluCasIA' in dataset or dataset == 'MMI' or dataset == 'Jaffe6' or dataset == 'MMI_CKplus':
+            if 'OuluCasIA' in dataset or dataset == 'SFEW' or dataset == 'fer2013' or dataset == 'MMI_CKplus':
                 category = 6
                 total_heatmap = [[0 for i in range(6)] for i in range(6)]
                 temp = config.start_part
-            else:
+            elif 'CKplus' == dataset:
                 category = 7
                 total_heatmap = [[0 for i in range(7)] for i in range(7)]
+                temp = config.start_part
+            elif 'ISED' == dataset:
+                category = 4
+                total_heatmap = [[0 for i in range(4)] for i in range(4)]
                 temp = config.start_part
             for part_number in range(temp, config.part_sum):
 
@@ -30,13 +34,6 @@ def main(config):
                 heatmap = train_model(image_dir_train=image_dir_train, image_dir_test=image_dir_test, lr = config.lr, batch_size=config.batch_size,
                                             datasets=dataset,use_gpu=config.use_gpu, num_work=config.num_work,epoch_size=config.epoch_size,
                                             resize=False, net=model, part_num=part_number, category=category).training()
-                #     #image_dir_train, image_dir_test, lr = 0.002, load_epoch = 0,  batch_size = 16, epoch_size = 20, datasets = 'CKplus', net = None ,
-                # #use_gpu = True, resize = True, category = 7, num_work=0, just_real_test = False, part_num = 10
-                # else:
-                #     # identity_num = 117
-                #     heatmap = train_model(image_dir_train=image_dir_train, image_dir_test=image_dir_test,
-                #                                 datasets=dataset, resize=False, net=model,
-                #                                 part_num=part_number).training()
                 total_heatmap = heatmap + total_heatmap
             if 'MSE' in dataset:
                 accuracy = open(os.path.join('../DML-results(MSE)', dataset, 'test_heatmap.txt'), 'w')
