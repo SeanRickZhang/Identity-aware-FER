@@ -6,5 +6,3 @@ PyTorch 1.4.0
 
 model parameters and 10-fold results Url: https://pan.baidu.com/s/1xjGyc8K2QkE7PezdCrjbwQ password:286g  
 StarGAN Url:https://github.com/yunjey/stargan  
-The procedure is as follows:  
-![]()
